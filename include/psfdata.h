@@ -5,7 +5,6 @@
 #include <complex>
 #include <iostream>
 #include <map>
-//#include <tr1/unordered_map>
 #include <vector>
 #include <sstream>
 
@@ -29,21 +28,21 @@ const int TYPEID_COMPLEXDOUBLE = 12;
 const int TYPEID_STRUCT = 16;
 
 // Data types
-typedef int8_t PSFInt8;
-typedef int32_t PSFInt32;
-typedef double PSFDouble;
-typedef std::complex<double> PSFComplexDouble;
-typedef std::string PSFString;
+using PSFInt8 = int8_t;
+using PSFInt32 = int32_t;
+using PSFDouble = double;
+using PSFComplexDouble = std::complex<double>;
+using PSFString = std::string;
 
 // 
 // Composite data types
 //
 class Struct: public std::map<std::string, PSFScalar *> {
  private:
-    const StructDef *structdef;
+    const StructDef *structdef = nullptr;
  public:
-    Struct() : structdef(NULL) {}
-    Struct(const StructDef *_structdef) { structdef = _structdef; }
+    Struct() = default;
+    explicit Struct(const StructDef *_structdef) : structdef(_structdef) {}
     Struct(const Struct&);
     ~Struct();
 
@@ -56,26 +55,10 @@ class Struct: public std::map<std::string, PSFScalar *> {
     friend std::ostream &operator<<(std::ostream &stream, const Struct &o);
 };
 
-
-/* class Group: public std::vector<PSFVector *> { */
-/*  private: */
-/*     const GroupDef *groupdef; */
-/*     std::vector<int> *filter; */
-/*  public: */
-/*     Group(const GroupDef *groupdef, std::vector<int> *filter=NULL); */
-/*     ~Group(); */
-    
-/*     void print(std::ostream &stream) const { */
-/* 	stream << groupdef; */
-/*     }; */
-/*     int datasize() const { return 0; } */
-/*     int deserialize(const char *buf, int n, int windowsize); */
-/* }; */
-
 // PSF base class
 class PSFBase {
  public:
-    virtual ~PSFBase() { };
+   virtual ~PSFBase() = default;;
 };
 
 //
@@ -85,11 +68,11 @@ class PSFScalar : public PSFBase {
  private:
     virtual void print(std::ostream &stream) const = 0;
  public:
-    virtual ~PSFScalar() {};
+    ~PSFScalar() final = default;;
     virtual int deserialize(const char *buf) { return 0; };
 
-    virtual operator int() const { return -1; }
-    virtual operator double() const { return 0.0; }
+    explicit virtual operator int() const { return -1; }
+    explicit virtual operator double() const { return 0.0; }
     virtual std::string tostring() const = 0;
     friend std::ostream &operator<<(std::ostream &stream, const PSFScalar &o);
     virtual void *ptr() = 0;
@@ -103,11 +86,11 @@ class PSFScalarT : public PSFScalar {
  public:
     T value;
 
-    PSFScalarT() {};
-    PSFScalarT(const T& init) : value(init) {};
+    PSFScalarT() = default;;
+    explicit PSFScalarT(const T& init) : value(init) {};
 
-    operator double() const;
-    operator int() const;
+    explicit operator double() const final;
+    explicit operator int() const final;
 
     std::string tostring() const {
 	std::stringstream out;
@@ -117,22 +100,22 @@ class PSFScalarT : public PSFScalar {
 
     int deserialize(const char *buf);
     void *ptr() { return &value; }
-    PSFScalar* clone() const { return new PSFScalarT(*this); }
+    PSFScalar* clone() const { return std::make_unique<PSFScalarT>(*this); }
 };
 
-typedef PSFScalarT<PSFDouble> PSFDoubleScalar;
-typedef PSFScalarT<PSFComplexDouble> PSFComplexDoubleScalar;
-typedef PSFScalarT<PSFInt8> PSFInt8Scalar;
-typedef PSFScalarT<PSFInt32> PSFInt32Scalar;
-typedef PSFScalarT<PSFString> PSFStringScalar;
-typedef PSFScalarT<Struct> StructScalar;
+using PSFDoubleScalar = PSFScalarT<PSFDouble>;
+using PSFComplexDoubleScalar = PSFScalarT<PSFComplexDouble>;
+using PSFInt8Scalar = PSFScalarT<PSFInt8>;
+using PSFInt32Scalar = PSFScalarT<PSFInt32>;
+using PSFStringScalar = PSFScalarT<PSFString>;
+using StructScalar = PSFScalarT<Struct>;
 
 //
 // Vector data
 //
 class PSFVector : public PSFBase {
  public:
-    virtual ~PSFVector() {};
+    ~PSFVector() final = default;;
     int type_id;
 
     virtual std::size_t size() const = 0;
@@ -151,12 +134,12 @@ class PSFVector : public PSFBase {
 template<class T>
 class PSFVectorT : public PSFVector, public std::vector<T> {
  private:
-    T init;
+   T init;
  public:
-    PSFVectorT() {};
-    PSFVectorT(const T& _init) : init(_init) {};
-    void extend(const PSFVector *vec) {
-	const PSFVectorT& tvec = dynamic_cast<const PSFVectorT &>(*vec);
+   PSFVectorT() = default;;
+   explicit PSFVectorT(const T& _init) : init(_init) {};
+   void extend(const PSFVector *vec) {
+	const auto& tvec = dynamic_cast<const PSFVectorT &>(*vec);
 	this->reserve(std::vector<T>::size() + distance(tvec.begin(), tvec.end()));
 	this->insert(std::vector<T>::end(), tvec.begin(), tvec.end());
     }
@@ -184,12 +167,12 @@ int psfdata_size(int type_id);
 
 class VectorStruct: public PSFBase, public std::map<std::string, PSFVector *> {
  private:
-    int n;
+    int n = 0;
     void init_from_structdef(const StructDef *structdef);
  public:
-    VectorStruct() : n(0) {}
-    VectorStruct(const StructDef *structdef); 
-    VectorStruct(const StructVector &);
+    VectorStruct() = default;
+    explicit VectorStruct(const StructDef *structdef); 
+    explicit VectorStruct(const StructVector &);
 
     int copy_from_structvector(const StructVector &);
     

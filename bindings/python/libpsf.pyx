@@ -41,7 +41,7 @@ cdef to_unicode(str_):
     return str_.encode('UTF-8')
 
 cdef bytes_to_string(str_list):
-    return map(lambda x: x.decode('UTF-8'), str_list)
+    return list(map(lambda x: x.decode('UTF-8'), str_list))
 
 
 cdef class PSFDataSet:
@@ -59,7 +59,8 @@ cdef class PSFDataSet:
 
     def get_sweep_npoints(self):
         """Return the number of points in the sweep"""
-        return self.obj.get_sweep_npoints()
+        x = self.obj.get_sweep_npoints()
+        return x
 
     def get_signal_names(self):
         """Return a list of signal names"""
@@ -75,7 +76,8 @@ cdef class PSFDataSet:
 
     def get_signal(self, signal):
         """Numpy array of signal values"""
-        return psfbase_to_numpy_array(self.obj.get_signal(to_unicode(signal)))
+        result= psfbase_to_numpy_array(self.obj.get_signal(to_unicode(signal)))
+        return result
 
     def get_signal_properties(self, signal):
         """Properties of a non swept signal
@@ -107,4 +109,13 @@ cdef class PSFDataSet:
     def get_invertstruct(self):
         """Get invert struct"""
         return self.obj.get_invertstruct()
+
+    @property
+    def invertstruct(self):
+        return self.obj.get_invertstruct()
+
+    @invertstruct.setter
+    def invertstruct(self, bool value):
+        """Set invert struct"""
+        self.obj.set_invertstruct(value)
 

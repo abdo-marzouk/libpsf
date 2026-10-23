@@ -1,17 +1,17 @@
 #include "psf.h"
 #include "psfinternal.h"
 #include "psfdata.h"
+#include <memory>
 
-PSFDataSet::PSFDataSet(std::string filename) : m_filename(filename), m_invertstruct(false) {
-    m_psf     = new PSFFile(m_filename.c_str());
-    m_is_open = false;
+
+PSFDataSet::PSFDataSet(std::string const& filename) : m_filename(filename) {
+    m_psf = std::make_shared<PSFFile>(m_filename.c_str());
     
     open();
 }
 
 PSFDataSet::~PSFDataSet() {
     m_psf->close();
-    delete m_psf;
 }
 
 void PSFDataSet::close() {
@@ -58,14 +58,14 @@ PSFVector *PSFDataSet::get_sweep_values() const {
     return m_psf->get_param_values();
 }
 
-PSFBase* PSFDataSet::get_signal(std::string name) const {
+PSFBase* PSFDataSet::get_signal(std::string const & name) const {
     verify_open();
 
     if (is_swept()) {
 	PSFVector *vec = get_signal_vector(name);
 	
 	if(m_invertstruct && dynamic_cast<const StructVector *>(vec)) {
-	    VectorStruct *vs = new VectorStruct(*dynamic_cast<const StructVector *>(vec));
+	    auto vs = std::make_shared<VectorStruct>(*dynamic_cast<const StructVector *>(vec));
 	    
 	    delete vec;
 	    

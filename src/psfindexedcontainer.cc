@@ -29,15 +29,6 @@ int TraceIndex::deserialize(const char *buf) {
 	
     uint32_t size = GET_INT32(buf);
     buf += sizeof(uint32_t);
-
-    int id, offset, extra1, extra2;
-    for(int i=0; i < size; i+=16) {
-	id = GET_INT32(buf+i);
-	offset = GET_INT32(buf+i+4);
-	extra1 = GET_INT32(buf+i+8);
-	extra2 = GET_INT32(buf+i+12);
-	//	std::cout << "(" << std::hex << id << "," << offset << "," << extra1 << "," << extra2 << ")" << std::endl;
-    }
 	
     return buf + size - startbuf;
 }

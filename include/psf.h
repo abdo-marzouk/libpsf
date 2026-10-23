@@ -2,7 +2,8 @@
 #define _PSF
 
 #include <stdlib.h>
-
+#include "psfdata.h"
+#include <memory>
 #include <exception>
 #include <vector>
 #include <string>
@@ -38,13 +39,12 @@ class NotFound:         public std::exception {};
 class DataSetNotOpen:   public std::exception {};
 class PropertyNotFound: public std::exception {};
 
-#include "psfdata.h"
 
 typedef std::map<std::string, const PSFScalar *> PropertyMap;
 
 class PSFDataSet {
  public:
-    PSFDataSet(std::string filename);
+    explicit PSFDataSet(std::string const& filename);
     ~PSFDataSet();
     void close();
     void open();
@@ -60,7 +60,7 @@ class PSFDataSet {
     PSFVector *get_sweep_values() const;
 
     const PropertyMap &get_signal_properties(std::string name) const;
-    PSFBase *get_signal(std::string name) const;
+    PSFBase *get_signal(std::string const& name) const;
     PSFVector *get_signal_vector(std::string name) const;
     const PSFScalar& get_signal_scalar(std::string name) const;
 
@@ -70,10 +70,10 @@ class PSFDataSet {
  private:
     void verify_open() const;
 
-    PSFFile *m_psf;
+    std::shared_ptr<PSFFile> m_psf;
     std::string m_filename;
-    bool m_invertstruct;
-    bool m_is_open;
+    bool m_invertstruct = false;
+    bool m_is_open = false;
 };
 
 #endif

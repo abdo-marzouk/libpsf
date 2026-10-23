@@ -23,13 +23,13 @@
 //
 // PSF constants
 //
-#define SECTION_HEADER 0
-#define SECTION_TYPE 1
-#define SECTION_SWEEP 2
-#define SECTION_TRACE 3
-#define SECTION_VALUE 4
+const int SECTION_HEADER = 0;
+const int SECTION_TYPE = 1;
+const int SECTION_SWEEP = 2;
+const int SECTION_TRACE = 3;
+const int SECTION_VALUE = 4;
 
-#define CHUNKID_VALUESECTIONEND 15
+const int CHUNKID_VALUESECTIONEND = 15;
 
 #define GET_INT32(buf) ntohl(*((uint32_t *)(buf)))
 #define GET_DOUBLE(dest, buf) *((uint64_t *)&(dest)) = be64toh(*((uint64_t *)(buf)))
@@ -600,7 +600,7 @@ private:
 
 class PSFFile {	
 public:	
-    PSFFile(std::string filename);
+    explicit PSFFile(std::string filename);
     ~PSFFile();
     
     NameList get_param_names() const;
@@ -626,13 +626,13 @@ public:
     bool validate() const;
     bool is_done() const;
 
-    std::string m_filename;
 
 private:
     SectionMap load_sections(const char *buf, int size);
     SectionMap load_table_of_contents(const char *buf, int size);
     void deserialize(const char *buf, int size);
 
+    std::string m_filename;
     int m_fd;
     const char *m_buffer;
     int m_size;

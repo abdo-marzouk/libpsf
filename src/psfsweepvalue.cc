@@ -9,11 +9,11 @@ ValueSectionSweep::ValueSectionSweep(PSFFile *psf) : m_psf(psf) {
 
     windowedsweep = m_psf->get_header_properties().hasprop("PSF window size");
 
-    m_valuebuf = endbuf = NULL;
+    m_valuebuf = endbuf = nullptr;
 }
 
-void ValueSectionSweep::_create_valueoffsetmap(bool windowedsweep) {    
-  const DataTypeRef *ref = NULL;
+void ValueSectionSweep::_create_valueoffsetmap(bool windowedsweepLocal) {    
+  const DataTypeRef *ref = nullptr;
   Container::const_iterator itrace;
   int valueoffset = 0;
   int child_datasize;
@@ -21,7 +21,7 @@ void ValueSectionSweep::_create_valueoffsetmap(bool windowedsweep) {
   m_valuesize = 0;
   m_ntraces = 0;
   
-  if (windowedsweep) {
+  if (windowedsweepLocal) {
     int windowsize = m_psf->get_header_properties().find("PSF window size");
 	
     for(itrace = m_psf->get_trace_section().begin(); itrace != m_psf->get_trace_section().end(); itrace++) {
@@ -37,7 +37,7 @@ void ValueSectionSweep::_create_valueoffsetmap(bool windowedsweep) {
     for(itrace = m_psf->get_trace_section().begin(); itrace != m_psf->get_trace_section().end(); itrace++) {
       ref = dynamic_cast<const DataTypeRef *>(*itrace);
 
-      if(NULL != ref) {
+      if(nullptr != ref) {
 	const DataTypeDef &datatypedef = ref->get_datatype();
 	
 	// In waveform families there is a data file that only contains sweep values.
