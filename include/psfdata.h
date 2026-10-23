@@ -68,7 +68,7 @@ class PSFScalar : public PSFBase {
  private:
     virtual void print(std::ostream &stream) const = 0;
  public:
-    ~PSFScalar() final = default;;
+    ~PSFScalar() = default;;
     virtual int deserialize(const char *buf) { return 0; };
 
     explicit virtual operator int() const { return -1; }
@@ -100,7 +100,7 @@ class PSFScalarT : public PSFScalar {
 
     int deserialize(const char *buf);
     void *ptr() { return &value; }
-    PSFScalar* clone() const { return std::make_unique<PSFScalarT>(*this); }
+    PSFScalar* clone() const { return new PSFScalarT(*this); }
 };
 
 using PSFDoubleScalar = PSFScalarT<PSFDouble>;
@@ -115,7 +115,7 @@ using StructScalar = PSFScalarT<Struct>;
 //
 class PSFVector : public PSFBase {
  public:
-    ~PSFVector() final = default;;
+    ~PSFVector() = default;;
     int type_id;
 
     virtual std::size_t size() const = 0;

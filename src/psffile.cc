@@ -67,7 +67,7 @@ SectionMap PSFFile::load_sections(const char *buf, int size){
     int num_sweep_points = 0;
     bool has_sweep = get_header_properties().hasprop("PSF sweep points");
     if (has_sweep)
-        num_sweep_points = get_header_properties().find("PSF sweep points");
+        num_sweep_points = static_cast<int>(get_header_properties().find("PSF sweep points"));
     
     if (num_sweep_points == 0)
         sections[2].n = SECTION_VALUE;

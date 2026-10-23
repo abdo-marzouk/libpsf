@@ -65,7 +65,7 @@ PSFBase* PSFDataSet::get_signal(std::string const & name) const {
 	PSFVector *vec = get_signal_vector(name);
 	
 	if(m_invertstruct && dynamic_cast<const StructVector *>(vec)) {
-	    auto vs = std::make_shared<VectorStruct>(*dynamic_cast<const StructVector *>(vec));
+	    VectorStruct *vs = new VectorStruct(*dynamic_cast<const StructVector *>(vec));
 	    
 	    delete vec;
 	    
@@ -110,7 +110,7 @@ const PropertyMap & PSFDataSet::get_header_properties() const {
 bool PSFDataSet::is_swept() const {
     verify_open();
 
-    const int nsweeps = m_psf->get_header_properties().find("PSF sweeps");
+    const int nsweeps = static_cast<int>(m_psf->get_header_properties().find("PSF sweeps"));
 
     return nsweeps > 0;
 }

@@ -60,6 +60,8 @@ void raise_py_error(){
     }catch (IncorrectChunk& e){
         std::stringstream msg; msg << "Incorrect chunk " << e.chunktype;
         PyErr_SetString(incorrectChunkError, msg.str().c_str());
+    }catch (NotImplemented& e){
+        PyErr_SetString(PyExc_NotImplementedError, "Conversion of this PSF type to python is not implemented");
     }catch (const std::exception & e){
         PyErr_SetString(PyExc_RuntimeError, "general exception");
     }
@@ -71,6 +73,10 @@ PyObject *psfscalar_to_python(const PSFScalar *scalar) {
         result = PyFloat_FromDouble(p->value);
     else if (const PSFInt32Scalar *p = dynamic_cast<const PSFInt32Scalar *>(scalar))
         result = LONG_INPUT_FN((int)*p);
+    else if (const PSFInt8Scalar *p = dynamic_cast<const PSFInt8Scalar *>(scalar))
+        result = LONG_INPUT_FN((long)p->value);
+    else if (const PSFComplexDoubleScalar *p = dynamic_cast<const PSFComplexDoubleScalar *>(scalar))
+        result = PyComplex_FromDoubles(p->value.real(), p->value.imag());
     else if (const PSFStringScalar *p = dynamic_cast<const PSFStringScalar *>(scalar))
         result = STRING_INPUT_FN(p->tostring().c_str());
     else if(const StructScalar *p = dynamic_cast<const StructScalar *>(scalar))
@@ -148,8 +154,12 @@ PyObject* psfvector_to_numpy_array(PSFVector *vec, bool copy) {
 
 PyObject* psfbase_to_numpy_array(PSFBase * d){
     const PSFScalar *scalar = dynamic_cast<const PSFScalar *>(d);
-    if (scalar != NULL)
-        return psfscalar_to_python(scalar);
+    if (scalar != NULL) {
+        // get_signal returns a caller-owned clone
+        PyObject *result = psfscalar_to_python(scalar);
+        delete scalar;
+        return result;
+    }
     else {	
         PSFVector *vector = dynamic_cast<PSFVector *>(d);
         if (vector != NULL)
@@ -157,8 +167,12 @@ PyObject* psfbase_to_numpy_array(PSFBase * d){
         else {
             VectorStruct *vs = dynamic_cast<VectorStruct *>(d);
 
-            if(vs != NULL)
-                return vector_struct_to_python(vs);
+            if(vs != NULL) {
+                PyObject *result = vector_struct_to_python(vs);
+                // member vectors are deleted by vector_struct_to_python
+                delete vs;
+                return result;
+            }
             else
                 return Py_None;
         }

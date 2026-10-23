@@ -4,16 +4,16 @@
 from libcpp cimport bool
 
 from cpython.ref cimport PyObject
-from cpp_defs cimport PSFVector, PSFBase, PropertyMap
+from cpp_defs cimport PSFVector, PSFBase, PropertyMap, raise_py_error
 from cpp_defs cimport PSFDataSet as C_PSFDataSet
 
 cimport numpy as np
 np.import_array()
 
 cdef extern from "psfpython.h":
-    cdef np.ndarray psfvector_to_numpy_array(PSFVector *vec, bool copy)
-    cdef object psfbase_to_numpy_array(PSFBase *d)
-    cdef object propertymap_to_python(PropertyMap& propmap)
+    cdef np.ndarray psfvector_to_numpy_array(PSFVector *vec, bool copy) except +raise_py_error
+    cdef object psfbase_to_numpy_array(PSFBase *d) except +raise_py_error
+    cdef object propertymap_to_python(PropertyMap& propmap) except +raise_py_error
 
 class FileOpenError(RuntimeError):
     pass

@@ -22,7 +22,7 @@ void ValueSectionSweep::_create_valueoffsetmap(bool windowedsweepLocal) {
   m_ntraces = 0;
   
   if (windowedsweepLocal) {
-    int windowsize = m_psf->get_header_properties().find("PSF window size");
+    int windowsize = static_cast<int>(m_psf->get_header_properties().find("PSF window size"));
 	
     for(itrace = m_psf->get_trace_section().begin(); itrace != m_psf->get_trace_section().end(); itrace++) {
       if(const GroupDef *groupdef = dynamic_cast<const GroupDef *>(*itrace)) 
@@ -67,7 +67,7 @@ SweepValue* ValueSectionSweep::get_values(Filter &filter) const {
 
     SweepValue *value = new_value();
     
-    int n = m_psf->get_header_properties().find("PSF sweep points");
+    int n = static_cast<int>(m_psf->get_header_properties().find("PSF sweep points"));
     
     int windowoffset = 0;
     value->deserialize(buf, &n, windowoffset, m_psf, filter);
@@ -168,8 +168,8 @@ int SweepValueWindowed::deserialize(const char *buf, int *totaln, int windowoffs
 				    Filter &filter) {
     const char *startbuf = buf;
 
-    int windowsize = psf->get_header_properties().find("PSF window size");
-    int ntraces    = psf->get_header_properties().find("PSF traces");
+    int windowsize = static_cast<int>(psf->get_header_properties().find("PSF window size"));
+    int ntraces    = static_cast<int>(psf->get_header_properties().find("PSF traces"));
 
     // Create parameter vector
     DataTypeRef &paramtype = *((DataTypeRef *)psf->get_sweep_section()[0]);
